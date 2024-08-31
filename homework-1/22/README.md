@@ -2,6 +2,10 @@
 
 A few simple pallets for learning and demo the capability of Substrate blockchain framework.
 
+## poe testcase
+![poetestcase](./poetestcase.jpg "Magic Gardens")
+
+
 ## Runtime Modules
 
 Disclaimer: these modules are for learning purpose, you should never use them in *production*.
