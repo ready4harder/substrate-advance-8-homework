@@ -61,8 +61,9 @@ fn test_revoke_claim_success() {
         claim.try_push(255_u8).expect("Failed to push");
         claim.try_push(255_u8).expect("Failed to push");
 
+        // 创建存证
         assert_ok!(PoeModule::create_claim(RuntimeOrigin::signed(1), claim.clone()));
-
+        // 撤销存证
         assert_ok!(PoeModule::revoke_claim(RuntimeOrigin::signed(1), claim.clone()));
     });
 }
