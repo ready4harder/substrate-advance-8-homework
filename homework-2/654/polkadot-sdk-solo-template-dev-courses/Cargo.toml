@@ -1,5 +1,5 @@
 [workspace.package]
-authors = ["daijinwei@gmail>"]
+authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 repository = "https://github.com/papermoonio/polkadot-sdk-solo-template-dev-courses.git"
 license = "GPL-3.0-only"
@@ -10,7 +10,8 @@ resolver = "2"
 
 members = [
 	"node",
-	'pallets/poe',
+	"pallets/template",
+	"pallets/poe",
 	"runtime",
 ]
 
