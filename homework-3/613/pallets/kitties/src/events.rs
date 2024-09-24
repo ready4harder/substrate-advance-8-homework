@@ -11,5 +11,25 @@ mod events {
             index: u32,
             data: [u8; 16],
         },
+        KittyBreeded{
+            creator: T::AccountId,
+            index: u32,
+            parent_index: (u32,u32),
+            data: [u8; 16],
+        },
+        KittyListSaled {
+            index: u32,
+            until_block: BlockNumberFor<T>,
+        },
+        KittyBided {
+            bidder: T::AccountId,
+            index: u32,
+            price: BalanceOf<T>,
+        },
+        KittyTransfered{
+            owner: T::AccountId,
+            to: T::AccountId,
+            index: u32,
+        }
     }
 }

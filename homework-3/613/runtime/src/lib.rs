@@ -256,6 +256,8 @@ impl pallet_kitties::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = pallet_kitties::weights::SubstrateWeight<Runtime>;
     type Randomness = Random;
+    type Currency = Balances;
+
 }
 
 impl pallet_insecure_randomness_collective_flip::Config for Runtime {}

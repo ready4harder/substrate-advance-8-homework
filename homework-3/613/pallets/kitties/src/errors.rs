@@ -9,6 +9,12 @@ mod errors {
         InvalidKittyId,
         NotOwner,
         SameKittyId,
-        KittyIdOverflow
+        KittyIdOverflow,
+        KittyNotExist,
+        KittyNotOnSale,
+        KittySaleExpired,
+        NotEnoughBidPrice,
+        NotSelfTransfer,
+        TransferSaleNotFinish
     }
 }

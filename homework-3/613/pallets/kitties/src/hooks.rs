@@ -11,6 +11,28 @@ mod hooks {
 
         fn on_initialize(n: BlockNumberFor<T>) -> Weight {
             log::info!("Kitties on_initialize at block {:?}", n);
+            KittyOnSale::<T>::iter().for_each(|(kitty_id,until_block)|{
+                if until_block==n{
+                    let owner = KittyOwner::<T>::get(kitty_id).expect("not get kitty owner");
+                    if let Some(bids) = KittiesBid::<T>::take(kitty_id){
+                        let mut new_owner = None;
+                        let mut final_price = BalanceOf::<T>::min_value();
+                        for bid in bids.iter(){
+                            T::Currency::unreserve(&bid.0,bid.1);
+                            if bid.1>final_price{
+                                final_price = bid.1;
+                                new_owner = Some(bid.0.clone());
+                            }
+                        }
+
+                        if final_price != BalanceOf::<T>::min_value(){
+                            T::Currency::transfer(&new_owner.clone().unwrap(),&owner.clone(),final_price,ExistenceRequirement::KeepAlive).expect("");
+                            
+                            KittyOwner::<T>::insert(kitty_id,new_owner.clone().unwrap());
+                        }
+                    }
+                }
+            });
             Weight::default()
         }
 
