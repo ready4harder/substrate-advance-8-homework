@@ -41,9 +41,9 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_kitties;
 /// Import the template pallet.
 pub use pallet_template;
-pub use pallet_poe;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -247,17 +247,18 @@ impl pallet_sudo::Config for Runtime {
     type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
-/// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_poe::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type MaxClaimLength = ConstU32<3>;
+impl pallet_kitties::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_kitties::weights::SubstrateWeight<Runtime>;
+    type Randomness = Random;
 }
 
+impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
 // Create the runtime by composing the FRAME pallets that were previously configured.
 #[frame_support::runtime]
 mod runtime {
@@ -301,7 +302,10 @@ mod runtime {
     pub type TemplateModule = pallet_template;
 
     #[runtime::pallet_index(8)]
-    pub type PoeModule = pallet_poe;
+    pub type Kitties = pallet_kitties;
+
+    #[runtime::pallet_index(9)]
+    pub type Random = pallet_insecure_randomness_collective_flip;
 }
 
 /// The address format for describing accounts.
@@ -352,7 +356,7 @@ mod benches {
         [pallet_timestamp, Timestamp]
         [pallet_sudo, Sudo]
         [pallet_template, TemplateModule]
-        [pallet_poe, PoeModule]
+        [pallet_kitties, Kitties]
     );
 }
 
