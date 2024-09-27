@@ -1,7 +1,8 @@
 # homework 3
 
-# 測試方法：
-cargo test -p pallet-kitties
-
-# 結果:
-![alt text](https://github.com/MartinYeung5/substrate-advance-8-homework/blob/main/homework-3/677/pallets/kitties/20240927_results.png?raw=true)
+1. Clone 代码 https://github.com/papermoonio/polkadot-sdk-course-code/advance/lesson-3
+2. 去掉 Pallet的dev模式，dev-mode
+3. 完成Pallet的开发，5个extrinsic。单元测试覆盖所有错误和事件
+4. 完成和Balances的交互，创建Kitty和交易Kitty都有相应的Token操作
+5. 完成benchmark测试，得到weights文件
+6. 链可以正常通过编译，启动
