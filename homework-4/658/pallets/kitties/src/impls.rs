@@ -140,9 +140,16 @@ mod impls {
                     );
                     <KittyOwner<T>>::insert(kitty_id, bidder.clone());
                     Self::deposit_event(Event::KittyTransferred {
+                        from: owner.clone(),
+                        to: bidder.clone(),
+                        kitty_id,
+                    });
+                    Self::deposit_event(Event::KittyTransferredAfterBidKnockedDown {
                         from: owner,
                         to: bidder,
                         kitty_id,
+                        price,
+                        usd_price: Self::average_price().map(|p| price * p.into()), //ignore Balance decimal 12    cents /dot 10^12
                     });
                 } else {
                     log::warn!(

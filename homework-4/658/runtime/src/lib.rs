@@ -261,8 +261,73 @@ impl pallet_kitties::Config for Runtime {
     type MinBidIncrement = ConstU128<500>;
     type MinBidBlockSpan = ConstU32<10>;
     type MaxKittiesBidPerBlock = ConstU32<10>;
-
+    type MaxPrices = ConstU32<64>;
     type MaxKittiesOwned= ConstU32<10>;
+}
+
+use codec::Encode;
+use sp_runtime::{generic::Era, SaturatedConversion};
+impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+where
+    RuntimeCall: From<LocalCall>,
+{
+    fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+        call: RuntimeCall,
+        public: <Signature as Verify>::Signer,
+        account: AccountId,
+        nonce: Nonce,
+    ) -> Option<(
+        RuntimeCall,
+        <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
+    )> {
+        let tip = 0;
+        // take the biggest period possible.
+        let period = BlockHashCount::get()
+            .checked_next_power_of_two()
+            .map(|c| c / 2)
+            .unwrap_or(2) as u64;
+        let current_block = System::block_number()
+            .saturated_into::<u64>()
+            // The `System::block_number` is initialized with `n+1`,
+            // so the actual block number is `n`.
+            .saturating_sub(1);
+        let era = Era::mortal(period, current_block);
+        let extra = (
+            frame_system::CheckNonZeroSender::<Runtime>::new(),
+            frame_system::CheckSpecVersion::<Runtime>::new(),
+            frame_system::CheckTxVersion::<Runtime>::new(),
+            frame_system::CheckGenesis::<Runtime>::new(),
+            frame_system::CheckEra::<Runtime>::from(era),
+            frame_system::CheckNonce::<Runtime>::from(nonce),
+            frame_system::CheckWeight::<Runtime>::new(),
+            pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+        );
+        let raw_payload = SignedPayload::new(call, extra)
+            .map_err(|e| {
+                log::warn!("Unable to create signed payload: {:?}", e);
+            })
+            .ok()?;
+        let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
+        let address = account;
+        let (call, extra, _) = raw_payload.deconstruct();
+        Some((
+            call,
+            (sp_runtime::MultiAddress::Id(address), signature, extra),
+        ))
+    }
+}
+
+impl frame_system::offchain::SigningTypes for Runtime {
+    type Public = <Signature as sp_runtime::traits::Verify>::Signer;
+    type Signature = Signature;
+}
+
+impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
+where
+    RuntimeCall: From<C>,
+{
+    type Extrinsic = UncheckedExtrinsic;
+    type OverarchingCall = RuntimeCall;
 }
 
 impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
@@ -333,11 +398,36 @@ pub type SignedExtra = (
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 
+pub struct KittiesMigration<T: pallet_kitties::Config>(core::marker::PhantomData<T>);
+impl<T: pallet_kitties::Config> frame_support::traits::OnRuntimeUpgrade for KittiesMigration<T> {
+    fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        log::info!("Kitties migration");
+        // pallet_kitties::NextKittyId::<T>::put(0);
+        pallet_kitties::KittyId::<T>::mutate(|kitty_id| *kitty_id = 0);
+        Weight::default()
+    }
+    #[cfg(feature = "try-runtime")]
+    fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::TryRuntimeError> {
+        log::info!("Kitties pre_upgrade");
+        let kitty_id = pallet_kitties::NextKittyId::<T>::get();
+        Ok(kitty_id.encode())
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn post_upgrade(state: Vec<u8>) -> Result<(), sp_runtime::TryRuntimeError> {
+        log::info!("Kitties post_upgrade");
+        let kitty_id_before = u32::decode(&mut &state[..]).map_err(|_| "invalid state")?;
+        let kitty_id_after = pallet_kitties::NextKittyId::<T>::get();
+        assert!(kitty_id_before == kitty_id_after, "invalid state");
+        Ok(())
+    }
+}
+
 /// All migrations of the runtime, aside from the ones declared in the pallets.
 ///
 /// This can be a tuple of types, each implementing `OnRuntimeUpgrade`.
 #[allow(unused_parens)]
-type Migrations = ();
+type Migrations = (KittiesMigration<Runtime>);
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
