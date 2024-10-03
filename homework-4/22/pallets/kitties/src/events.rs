@@ -31,6 +31,12 @@ mod events {
         OnBid {
             kitty_id: u32,
             price: BalanceOf<T>,
+            price_usd: BalanceOf<T>,
+        },
+
+        NewPrice {
+            price: u32,
+            maybe_who: Option<T::AccountId>,
         },
     }
 }
