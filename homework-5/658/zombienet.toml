@@ -1,0 +1,23 @@
+[settings]
+timeout = 1000
+
+[relaychain]
+default_command = "./polkadot"
+chain = "rococo-local"
+
+  [[relaychain.nodes]]
+  name = "alice"
+  validator = true
+  ws_port = 9944
+
+  [[relaychain.nodes]]
+  name = "bob"
+  validtator = true
+  ws_port = 9955
+
+[[parachains]]
+id = 1000
+
+  [parachains.collator]
+  name = "charlie"
+  command = "./parachain-template-node"
