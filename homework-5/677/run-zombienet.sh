@@ -1,0 +1,1 @@
+zombienet --provider native spawn ./zombienet.toml

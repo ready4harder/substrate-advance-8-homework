@@ -1,3 +1,5 @@
+# homework 3
+
 1. Clone 代码 https://github.com/papermoonio/polkadot-sdk-course-code/advance/lesson-3
 2. 去掉 Pallet的dev模式，dev-mode
 3. 完成Pallet的开发，5个extrinsic。单元测试覆盖所有错误和事件
